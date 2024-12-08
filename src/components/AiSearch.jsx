@@ -8,15 +8,18 @@ export const AiSearch = () => {
   const [loading, setLoading] = useState(false);
   const [searchResult, setSearchResult] = useState("");
 
-  const handleAISearch = async () => {
-    const prompt = `Act an an AI recommendation system and give me relevant output based on ${searchText.current.value}`;
+  const handleAISearch = async (e) => {
+    e.preventDefault();
+
+    const prompt = `Act as an AI recommendation system and give me relevant output based on ${searchText.current.value}`;
     try {
       setLoading(true);
       setError(null);
+
       const gptresult = await openai.generateContent(prompt);
       const response = gptresult.response;
 
-      const text = response.text();
+      const text = await response.text();
 
       if (!text) {
         return;
@@ -25,28 +28,27 @@ export const AiSearch = () => {
       setSearchResult(text);
     } catch (error) {
       setError(error);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
     <div className="container-fluid py-5 w-75">
-      <h2> AI Search</h2>
+      <h2>AI Search</h2>
       <div className="">
-        <form action="#" className="d-flex">
+        <form action="#" className="d-flex" onSubmit={handleAISearch}>
           <input
             ref={searchText}
             type="search"
             placeholder="eg: How to setup React.js project"
             className="form-control"
           />
-          <button onClick={handleAISearch} className="btn btn-info text-nowrap">
+          <button type="submit" className="btn btn-info text-nowrap">
             Search
           </button>
         </form>
       </div>
-
       {loading ? (
         <h3 className="position-absolute top-50 start-50 translate-middle">
           Loading...
@@ -58,6 +60,7 @@ export const AiSearch = () => {
           </div>
         )
       )}
+      {error && <p className="text-danger">{error.message}</p>}
     </div>
   );
 };
